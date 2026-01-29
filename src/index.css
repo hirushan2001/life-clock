@@ -1,0 +1,300 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    /* Warm, contemplative light theme */
+    --background: 40 30% 98%;
+    --foreground: 220 25% 10%;
+
+    --card: 40 25% 96%;
+    --card-foreground: 220 25% 10%;
+
+    --popover: 40 25% 96%;
+    --popover-foreground: 220 25% 10%;
+
+    /* Warm amber primary - sand/hourglass */
+    --primary: 35 85% 50%;
+    --primary-foreground: 40 30% 98%;
+
+    --secondary: 220 15% 92%;
+    --secondary-foreground: 220 25% 20%;
+
+    --muted: 40 20% 94%;
+    --muted-foreground: 220 15% 45%;
+
+    --accent: 35 70% 60%;
+    --accent-foreground: 220 25% 10%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 40 20% 88%;
+    --input: 40 20% 88%;
+    --ring: 35 85% 50%;
+
+    --radius: 0.75rem;
+
+    /* Custom tokens for Memento */
+    --amber: 35 85% 50%;
+    --amber-glow: 35 90% 60%;
+    --amber-dim: 35 60% 35%;
+    --sand: 40 40% 85%;
+    --sand-light: 40 35% 92%;
+    
+    --week-lived: 35 70% 55%;
+    --week-current: 35 90% 60%;
+    --week-remaining: 220 15% 85%;
+    
+    --counter-bg: 40 25% 94%;
+    --counter-text: 220 25% 15%;
+    --counter-accent: 35 85% 50%;
+
+    --sidebar-background: 40 25% 96%;
+    --sidebar-foreground: 220 25% 20%;
+    --sidebar-primary: 35 85% 50%;
+    --sidebar-primary-foreground: 40 30% 98%;
+    --sidebar-accent: 40 30% 92%;
+    --sidebar-accent-foreground: 220 25% 15%;
+    --sidebar-border: 40 20% 88%;
+    --sidebar-ring: 35 85% 50%;
+  }
+
+  .dark {
+    /* Deep, contemplative dark theme */
+    --background: 222 35% 8%;
+    --foreground: 40 25% 95%;
+
+    --card: 222 30% 12%;
+    --card-foreground: 40 25% 95%;
+
+    --popover: 222 30% 12%;
+    --popover-foreground: 40 25% 95%;
+
+    /* Warm amber primary - glowing sand */
+    --primary: 35 85% 55%;
+    --primary-foreground: 222 35% 8%;
+
+    --secondary: 222 25% 18%;
+    --secondary-foreground: 40 25% 90%;
+
+    --muted: 222 25% 15%;
+    --muted-foreground: 220 15% 55%;
+
+    --accent: 35 75% 50%;
+    --accent-foreground: 222 35% 8%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 222 25% 18%;
+    --input: 222 25% 18%;
+    --ring: 35 85% 55%;
+
+    /* Custom tokens for Memento - Dark */
+    --amber: 35 85% 55%;
+    --amber-glow: 35 90% 65%;
+    --amber-dim: 35 50% 30%;
+    --sand: 40 30% 25%;
+    --sand-light: 40 25% 20%;
+    
+    --week-lived: 35 70% 50%;
+    --week-current: 35 90% 60%;
+    --week-remaining: 222 25% 20%;
+    
+    --counter-bg: 222 30% 14%;
+    --counter-text: 40 25% 95%;
+    --counter-accent: 35 85% 55%;
+
+    --sidebar-background: 222 30% 10%;
+    --sidebar-foreground: 40 25% 90%;
+    --sidebar-primary: 35 85% 55%;
+    --sidebar-primary-foreground: 222 35% 8%;
+    --sidebar-accent: 222 25% 16%;
+    --sidebar-accent-foreground: 40 25% 95%;
+    --sidebar-border: 222 25% 18%;
+    --sidebar-ring: 35 85% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted/30;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/20 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/30;
+  }
+}
+
+@layer components {
+  /* Counter display styles */
+  .counter-unit {
+    @apply flex flex-col items-center justify-center p-3 rounded-lg bg-counter-bg;
+  }
+
+  .counter-value {
+    @apply font-mono text-3xl md:text-4xl lg:text-5xl font-bold text-counter-accent tabular-nums;
+  }
+
+  .counter-label {
+    @apply text-xs md:text-sm text-muted-foreground uppercase tracking-widest mt-1;
+  }
+
+  /* Week grid styles */
+  .week-box {
+    @apply w-2 h-2 md:w-2.5 md:h-2.5 rounded-sm transition-all duration-300;
+  }
+
+  .week-lived {
+    @apply bg-week-lived;
+  }
+
+  .week-current {
+    @apply bg-week-current shadow-lg shadow-week-current/50;
+  }
+
+  .week-remaining {
+    @apply bg-week-remaining;
+  }
+
+  /* Glass effect */
+  .glass {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent;
+  }
+
+  /* Sand animation */
+  .sand-flow {
+    @apply relative overflow-hidden;
+  }
+
+  .sand-flow::after {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-b from-transparent via-primary/10 to-transparent;
+    animation: sandFlow 2s ease-in-out infinite;
+  }
+
+  /* Glow effect */
+  .glow {
+    @apply relative;
+  }
+
+  .glow::before {
+    content: '';
+    @apply absolute -inset-1 bg-primary/20 rounded-lg blur-xl opacity-0 transition-opacity duration-500;
+  }
+
+  .glow:hover::before {
+    @apply opacity-100;
+  }
+}
+
+@layer utilities {
+  /* Animation utilities */
+  .animate-sand-flow {
+    animation: sandFlow 2s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulseSlow 3s ease-in-out infinite;
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-tick {
+    animation: tick 1s ease-in-out;
+  }
+
+  /* Delay utilities */
+  .delay-75 { animation-delay: 75ms; }
+  .delay-150 { animation-delay: 150ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-500 { animation-delay: 500ms; }
+  .delay-700 { animation-delay: 700ms; }
+  .delay-1000 { animation-delay: 1000ms; }
+}
+
+@keyframes sandFlow {
+  0%, 100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(100%);
+    opacity: 1;
+  }
+}
+
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px hsl(var(--primary) / 0.3), 0 0 10px hsl(var(--primary) / 0.2);
+  }
+  100% {
+    box-shadow: 0 0 10px hsl(var(--primary) / 0.5), 0 0 20px hsl(var(--primary) / 0.3);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes tick {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
