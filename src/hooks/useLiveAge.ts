@@ -22,34 +22,44 @@ export interface LifeInsights {
   weekendsRemaining: number;
 }
 
-export function useLiveAge(dateOfBirth: string | null, targetAge: number = 80) {
+export function useLiveAge(dateOfBirth: string | null, targetAge: number = 80, updateInterval: number = 50) {
   const [now, setNow] = useState(Date.now());
 
-  // High-precision timer for live updates
+  // Timer for live updates
   useEffect(() => {
     if (!dateOfBirth) return;
 
     let animationFrameId: number;
+    let timeoutId: NodeJS.Timeout;
     let lastUpdate = Date.now();
 
     const updateTime = () => {
       const currentTime = Date.now();
-      // Update every ~50ms for smooth animation without excessive renders
-      if (currentTime - lastUpdate >= 50) {
+      if (currentTime - lastUpdate >= updateInterval) {
         setNow(currentTime);
         lastUpdate = currentTime;
       }
-      animationFrameId = requestAnimationFrame(updateTime);
+
+      if (updateInterval < 1000) {
+        // For high frequency, use rAF
+        animationFrameId = requestAnimationFrame(updateTime);
+      } else {
+        // For low frequency, use timeout
+        timeoutId = setTimeout(updateTime, updateInterval);
+      }
     };
 
-    animationFrameId = requestAnimationFrame(updateTime);
+    updateTime();
 
     return () => {
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     };
-  }, [dateOfBirth]);
+  }, [dateOfBirth, updateInterval]);
 
   // Calculate age breakdown
   const age = useMemo((): AgeBreakdown | null => {
@@ -130,10 +140,10 @@ export function useLiveAge(dateOfBirth: string | null, targetAge: number = 80) {
     const currentWeek = weeksLived + 1;
     const weeksRemaining = Math.max(0, totalTargetWeeks - weeksLived);
     const yearsRemaining = Math.max(0, targetAge - age.years);
-    
+
     // Assuming 1 weekend per week
     const weekendsRemaining = weeksRemaining;
-    
+
     const percentComplete = Math.min(100, (weeksLived / totalTargetWeeks) * 100);
 
     return {

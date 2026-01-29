@@ -33,7 +33,7 @@ const AddProfileModal = ({ isOpen, onClose, onAdd }: AddProfileModalProps) => {
 
     const birthDate = new Date(dob);
     const today = new Date();
-    
+
     if (birthDate > today) {
       setError('Date of birth cannot be in the future');
       return;
@@ -41,7 +41,7 @@ const AddProfileModal = ({ isOpen, onClose, onAdd }: AddProfileModalProps) => {
 
     const target = parseInt(targetAge) || 80;
     const age = Math.floor((today.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25));
-    
+
     if (target < age) {
       setError('Target age must be greater than current age');
       return;
@@ -75,11 +75,11 @@ const AddProfileModal = ({ isOpen, onClose, onAdd }: AddProfileModalProps) => {
 
           {/* Modal */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, x: "-50%", y: "-45%" }}
+            animate={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
+            exit={{ opacity: 0, scale: 0.95, x: "-50%", y: "-45%" }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md p-4"
+            className="fixed left-1/2 top-1/2 z-50 w-full max-w-md p-4"
           >
             <div className="glass rounded-2xl p-6">
               {/* Header */}

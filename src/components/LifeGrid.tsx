@@ -8,7 +8,8 @@ interface LifeGridProps {
 }
 
 const LifeGrid = ({ dateOfBirth, targetAge }: LifeGridProps) => {
-  const { insights } = useLiveAge(dateOfBirth, targetAge);
+  // Update only once per minute, we don't need millisecond precision here
+  const { insights } = useLiveAge(dateOfBirth, targetAge, 60000);
 
   // Generate grid of weeks (capped at 4160 = 80 years for display)
   const totalWeeks = useMemo(() => {
@@ -17,6 +18,54 @@ const LifeGrid = ({ dateOfBirth, targetAge }: LifeGridProps) => {
 
   const weeksPerRow = 52; // One row per year
   const rows = Math.ceil(totalWeeks / weeksPerRow);
+
+  const grid = useMemo(() => {
+    if (!insights) return null;
+
+    return (
+      <div className="min-w-fit mx-auto" style={{ maxWidth: '100%' }}>
+        {Array.from({ length: rows }).map((_, rowIndex) => (
+          <div key={rowIndex} className="flex gap-0.5 mb-0.5">
+            {/* Year label */}
+            <div className="w-8 flex items-center justify-end pr-2">
+              {rowIndex % 10 === 0 && (
+                <span className="text-[10px] text-muted-foreground font-mono">
+                  {rowIndex}
+                </span>
+              )}
+            </div>
+
+            {/* Weeks in year */}
+            {Array.from({ length: weeksPerRow }).map((_, colIndex) => {
+              const weekNumber = rowIndex * weeksPerRow + colIndex + 1;
+              if (weekNumber > totalWeeks) return null;
+
+              const isLived = weekNumber < insights.currentWeek;
+              const isCurrent = weekNumber === insights.currentWeek;
+              // const isRemaining = weekNumber > insights.currentWeek;
+
+              let className = 'week-box ';
+              if (isCurrent) {
+                className += 'week-current animate-pulse';
+              } else if (isLived) {
+                className += 'week-lived';
+              } else {
+                className += 'week-remaining';
+              }
+
+              return (
+                <div
+                  key={colIndex}
+                  className={className}
+                  title={`Week ${weekNumber} (Year ${Math.floor(weekNumber / 52)})`}
+                />
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    );
+  }, [rows, totalWeeks, insights]);
 
   if (!insights) return null;
 
@@ -68,50 +117,7 @@ const LifeGrid = ({ dateOfBirth, targetAge }: LifeGridProps) => {
 
       {/* Week grid */}
       <div className="glass rounded-xl p-4 overflow-x-auto">
-        <div className="min-w-fit mx-auto" style={{ maxWidth: '100%' }}>
-          {Array.from({ length: rows }).map((_, rowIndex) => (
-            <div key={rowIndex} className="flex gap-0.5 mb-0.5">
-              {/* Year label */}
-              <div className="w-8 flex items-center justify-end pr-2">
-                {rowIndex % 10 === 0 && (
-                  <span className="text-[10px] text-muted-foreground font-mono">
-                    {rowIndex}
-                  </span>
-                )}
-              </div>
-              
-              {/* Weeks in year */}
-              {Array.from({ length: weeksPerRow }).map((_, colIndex) => {
-                const weekNumber = rowIndex * weeksPerRow + colIndex + 1;
-                if (weekNumber > totalWeeks) return null;
-
-                const isLived = weekNumber < insights.currentWeek;
-                const isCurrent = weekNumber === insights.currentWeek;
-                const isRemaining = weekNumber > insights.currentWeek;
-
-                return (
-                  <motion.div
-                    key={colIndex}
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{
-                      delay: Math.min(rowIndex * 0.02, 1),
-                      duration: 0.2,
-                    }}
-                    className={`week-box ${
-                      isCurrent
-                        ? 'week-current animate-glow'
-                        : isLived
-                        ? 'week-lived'
-                        : 'week-remaining'
-                    }`}
-                    title={`Week ${weekNumber} (Year ${Math.floor(weekNumber / 52)})`}
-                  />
-                );
-              })}
-            </div>
-          ))}
-        </div>
+        {grid}
       </div>
 
       {/* Bottom label */}
