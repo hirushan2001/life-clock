@@ -58,28 +58,68 @@ const Insights = ({ dateOfBirth, targetAge }: InsightsProps) => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {cards.map((card, index) => (
-          <motion.div
-            key={card.label}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="glass rounded-xl p-5 group hover:bg-card/90 transition-colors"
-          >
-            <div className="flex items-start gap-4">
-              <div className={`p-2 rounded-lg bg-primary/10 ${card.color}`}>
-                <card.icon className="w-5 h-5" />
+        {cards.map((card, index) => {
+          // Micro-interaction: Weekends Left tooltip
+          const isWeekends = card.label === 'Weekends Left';
+          // Micro-interaction: Life Completed flip
+          const isLifeCompleted = card.label === 'Life Completed';
+
+          return (
+            <motion.div
+              key={card.label}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="glass rounded-xl p-5 group hover:bg-card/90 transition-all duration-300 hover:scale-[1.02] relative"
+            >
+              <div className="flex items-start gap-4">
+                <div className={`p-2 rounded-lg bg-primary/10 ${card.color}`}>
+                  <card.icon className="w-5 h-5" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-muted-foreground mb-1">{card.label}</p>
+
+                  <div className="relative">
+                    {/* Standard Value */}
+                    <p
+                      className={`text-2xl font-mono font-bold ${card.color} transition-opacity duration-300 
+                      ${isLifeCompleted ? 'group-hover:opacity-0' : ''}`}
+                    >
+                      {card.value}
+                    </p>
+
+                    {/* Hidden "Flip" Value for Life Completed */}
+                    {isLifeCompleted && (
+                      <p className={`text-2xl font-mono font-bold text-emerald-400 absolute top-0 left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300`}>
+                        {Math.max(0, 100 - insights.percentComplete).toFixed(2)}%
+                      </p>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {isLifeCompleted ? (
+                      <span className="block group-hover:hidden">{card.subtext}</span>
+                    ) : (
+                      card.subtext
+                    )}
+                    {isLifeCompleted && (
+                      <span className="hidden group-hover:block text-emerald-400">remaining</span>
+                    )}
+                  </p>
+
+                  {/* Weekends Left Hover Wisdom */}
+                  {isWeekends && (
+                    <div className="absolute inset-0 bg-background/95 backdrop-blur-sm rounded-xl flex items-center justify-center p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none text-center">
+                      <p className="text-sm text-amber-500 font-medium">
+                        "That's only about {Math.ceil(insights.weekendsRemaining / 26)} more beach seasons."
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground mb-1">{card.label}</p>
-                <p className={`text-2xl font-mono font-bold ${card.color}`}>
-                  {card.value}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">{card.subtext}</p>
-              </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* Motivational quote */}

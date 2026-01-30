@@ -44,11 +44,11 @@
     --amber-dim: 35 60% 35%;
     --sand: 40 40% 85%;
     --sand-light: 40 35% 92%;
-    
+
     --week-lived: 35 70% 55%;
     --week-current: 35 90% 60%;
     --week-remaining: 220 15% 85%;
-    
+
     --counter-bg: 40 25% 94%;
     --counter-text: 220 25% 15%;
     --counter-accent: 35 85% 50%;
@@ -100,11 +100,11 @@
     --amber-dim: 35 50% 30%;
     --sand: 40 30% 25%;
     --sand-light: 40 25% 20%;
-    
+
     --week-lived: 35 70% 50%;
     --week-current: 35 90% 60%;
     --week-remaining: 222 25% 20%;
-    
+
     --counter-bg: 222 30% 14%;
     --counter-text: 40 25% 95%;
     --counter-accent: 35 85% 55%;
@@ -150,6 +150,7 @@
 }
 
 @layer components {
+
   /* Counter display styles */
   .counter-unit {
     @apply flex flex-col items-center justify-center p-3 rounded-lg bg-counter-bg;
@@ -180,9 +181,8 @@
     @apply bg-week-remaining;
   }
 
-  /* Glass effect */
   .glass {
-    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+    @apply bg-card/60 backdrop-blur-xl border border-white/5 shadow-xl;
   }
 
   /* Gradient text */
@@ -217,6 +217,7 @@
 }
 
 @layer utilities {
+
   /* Animation utilities */
   .animate-sand-flow {
     animation: sandFlow 2s ease-in-out infinite;
@@ -239,19 +240,39 @@
   }
 
   /* Delay utilities */
-  .delay-75 { animation-delay: 75ms; }
-  .delay-150 { animation-delay: 150ms; }
-  .delay-300 { animation-delay: 300ms; }
-  .delay-500 { animation-delay: 500ms; }
-  .delay-700 { animation-delay: 700ms; }
-  .delay-1000 { animation-delay: 1000ms; }
+  .delay-75 {
+    animation-delay: 75ms;
+  }
+
+  .delay-150 {
+    animation-delay: 150ms;
+  }
+
+  .delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .delay-500 {
+    animation-delay: 500ms;
+  }
+
+  .delay-700 {
+    animation-delay: 700ms;
+  }
+
+  .delay-1000 {
+    animation-delay: 1000ms;
+  }
 }
 
 @keyframes sandFlow {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(-100%);
     opacity: 0;
   }
+
   50% {
     transform: translateY(100%);
     opacity: 1;
@@ -259,10 +280,13 @@
 }
 
 @keyframes pulseSlow {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
+
   50% {
     opacity: 0.7;
     transform: scale(1.02);
@@ -273,15 +297,19 @@
   0% {
     box-shadow: 0 0 5px hsl(var(--primary) / 0.3), 0 0 10px hsl(var(--primary) / 0.2);
   }
+
   100% {
     box-shadow: 0 0 10px hsl(var(--primary) / 0.5), 0 0 20px hsl(var(--primary) / 0.3);
   }
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-10px);
   }
@@ -291,9 +319,11 @@
   0% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.1);
   }
+
   100% {
     transform: scale(1);
   }

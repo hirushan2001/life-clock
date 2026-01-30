@@ -84,13 +84,19 @@ const LifeGrid = ({ dateOfBirth, targetAge }: LifeGridProps) => {
       </div>
 
       {/* Progress bar */}
-      <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-6">
+      <div className="w-full h-2 bg-muted rounded-full mb-6">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${insights.percentComplete}%` }}
           transition={{ duration: 1.5, ease: 'easeOut' }}
-          className="h-full bg-gradient-to-r from-amber-dim via-primary to-amber-glow rounded-full"
-        />
+          className="h-full bg-gradient-to-r from-amber-dim via-primary to-amber-glow rounded-full relative flex items-center justify-end"
+        >
+          <motion.div
+            animate={{ scale: [1, 1.2, 1], boxShadow: ["0 0 0 0px rgba(255,215,0,0.5)", "0 0 0 4px rgba(255,215,0,0)"] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="w-2.5 h-2.5 rounded-full bg-[#FFD700] -mr-1 z-10 shadow-sm"
+          />
+        </motion.div>
       </div>
 
       {/* Stats row */}

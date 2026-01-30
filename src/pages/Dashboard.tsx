@@ -79,6 +79,7 @@ const Dashboard = () => {
           <AgeCounter
             dateOfBirth={activeProfile.dateOfBirth}
             name={activeProfile.name}
+            hasActiveGoal={!!todayGoal?.goal && !todayGoal?.completed}
           />
         </section>
 
