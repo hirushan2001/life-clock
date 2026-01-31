@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Profile } from '@/hooks/useProfiles';
 import { User, Plus, Check, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,6 +36,23 @@ const ProfileSelector = ({
     setProfileToDelete(id);
   };
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setShowDelete(false);
+      }
+    };
+
+    if (showDelete) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDelete]);
+
   const confirmDelete = () => {
     if (profileToDelete) {
       onDelete(profileToDelete);
@@ -52,6 +69,7 @@ const ProfileSelector = ({
   return (
     <>
       <motion.div
+        ref={containerRef}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         className="glass rounded-xl p-4"
