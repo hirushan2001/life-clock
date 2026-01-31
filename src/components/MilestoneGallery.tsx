@@ -12,6 +12,17 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { differenceInDays, parseISO, format } from 'date-fns';
@@ -103,12 +114,29 @@ const MilestoneCard = ({ milestone, onDelete }: { milestone: Milestone; onDelete
 
     return (
         <div className="glass p-4 rounded-xl flex flex-col items-center justify-between gap-3 relative group hover:bg-card/80 transition-all duration-300">
-            <button
-                onClick={() => onDelete(milestone.id)}
-                className="absolute top-2 right-2 p-1.5 rounded-full bg-background/50 hover:bg-destructive/10 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-all"
-            >
-                <Trash2 className="w-3.5 h-3.5" />
-            </button>
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <button
+                        className="absolute top-2 right-2 p-1.5 rounded-full bg-background/50 hover:bg-destructive/10 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-all"
+                    >
+                        <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Milestone?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will permanently remove "{milestone.title}" from your dashboard.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => onDelete(milestone.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
 
             <div className="mt-2">
                 <CircularProgress
