@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useLiveAge } from '@/hooks/useLiveAge';
 import { Clock, Calendar, Sun, Percent } from 'lucide-react';
+import QuoteJournal from '@/components/QuoteJournal';
 
 interface InsightsProps {
   dateOfBirth: string;
@@ -122,18 +123,7 @@ const Insights = ({ dateOfBirth, targetAge }: InsightsProps) => {
         })}
       </div>
 
-      {/* Motivational quote */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6 }}
-        className="glass rounded-xl p-6 text-center mt-6"
-      >
-        <p className="text-muted-foreground italic">
-          "The trouble is, you think you have time."
-        </p>
-        <p className="text-xs text-muted-foreground/60 mt-2">— Jack Kornfield</p>
-      </motion.div>
+      <QuoteJournal />
     </motion.div>
   );
 };
