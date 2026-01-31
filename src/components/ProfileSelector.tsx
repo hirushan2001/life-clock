@@ -44,7 +44,7 @@ const ProfileSelector = ({
         setShowDelete(false);
       }
     };
-
+    
     if (showDelete) {
       document.addEventListener('mousedown', handleClickOutside);
     }

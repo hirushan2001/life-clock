@@ -24,9 +24,11 @@ const Dashboard = () => {
     setActiveProfile,
     deleteProfile,
     addProfile,
-    todayGoal,
-    setTodayGoal,
-    toggleGoalComplete,
+    todayGoals,
+    addGoal,
+    updateGoal,
+    deleteGoal,
+    toggleGoal,
   } = useProfiles();
 
   useTheme(); // Initialize theme
@@ -84,7 +86,7 @@ const Dashboard = () => {
           <AgeCounter
             dateOfBirth={activeProfile.dateOfBirth}
             name={activeProfile.name}
-            hasActiveGoal={!!todayGoal?.goal && !todayGoal?.completed}
+            hasActiveGoal={todayGoals.some(g => !g.completed)}
           />
         </section>
 
@@ -103,9 +105,11 @@ const Dashboard = () => {
 
           {/* Goal */}
           <GoalInput
-            goal={todayGoal}
-            onSave={setTodayGoal}
-            onToggleComplete={toggleGoalComplete}
+            goals={todayGoals}
+            onAdd={addGoal}
+            onUpdate={updateGoal}
+            onDelete={deleteGoal}
+            onToggle={toggleGoal}
           />
         </section>
 
