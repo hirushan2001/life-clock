@@ -10,6 +10,7 @@ import GoalInput from '@/components/GoalInput';
 import ProfileSelector from '@/components/ProfileSelector';
 import ThemeToggle from '@/components/ThemeToggle';
 import AddProfileModal from '@/components/AddProfileModal';
+import MilestoneGallery from '@/components/MilestoneGallery';
 
 const Dashboard = () => {
   const {
@@ -79,7 +80,13 @@ const Dashboard = () => {
           <AgeCounter
             dateOfBirth={activeProfile.dateOfBirth}
             name={activeProfile.name}
+            hasActiveGoal={!!todayGoal?.goal && !todayGoal?.completed}
           />
+        </section>
+
+        {/* Milestones */}
+        <section className="py-4">
+          <MilestoneGallery />
         </section>
 
         {/* Two column layout for insights and goal */}
@@ -97,6 +104,8 @@ const Dashboard = () => {
             onToggleComplete={toggleGoalComplete}
           />
         </section>
+
+
 
         {/* Life Grid */}
         <section className="py-8">

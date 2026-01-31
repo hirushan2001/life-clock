@@ -4,9 +4,10 @@ import { useLiveAge } from '@/hooks/useLiveAge';
 interface AgeCounterProps {
   dateOfBirth: string;
   name: string;
+  hasActiveGoal?: boolean;
 }
 
-const AgeCounter = ({ dateOfBirth, name }: AgeCounterProps) => {
+const AgeCounter = ({ dateOfBirth, name, hasActiveGoal = false }: AgeCounterProps) => {
   const { age, pad } = useLiveAge(dateOfBirth);
 
   if (!age) return null;
@@ -55,9 +56,8 @@ const AgeCounter = ({ dateOfBirth, name }: AgeCounterProps) => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1 * index, duration: 0.4 }}
-            className={`counter-unit glass rounded-xl ${
-              unit.size === 'large' ? 'col-span-1' : ''
-            }`}
+            className={`counter-unit glass rounded-xl ${unit.size === 'large' ? 'col-span-1' : ''
+              }`}
           >
             <motion.span
               key={unit.value}
@@ -82,7 +82,8 @@ const AgeCounter = ({ dateOfBirth, name }: AgeCounterProps) => {
         <div className="glass rounded-xl px-8 py-4 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-primary/10 to-primary/5 animate-sand-fall" />
           <div className="relative flex items-baseline gap-2">
-            <span className="font-mono text-4xl md:text-5xl font-bold text-primary tabular-nums">
+            <span className={`font-mono text-4xl md:text-5xl font-bold transition-colors duration-500 tabular-nums ${hasActiveGoal ? 'text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]' : 'text-primary'
+              }`}>
               {pad(age.milliseconds, 3)}
             </span>
             <span className="text-sm text-muted-foreground uppercase tracking-widest">
