@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Hourglass, Settings } from 'lucide-react';
 import { useProfiles } from '@/hooks/useProfiles';
@@ -13,6 +13,10 @@ import AddProfileModal from '@/components/AddProfileModal';
 import MilestoneGallery from '@/components/MilestoneGallery';
 
 const Dashboard = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const {
     profiles,
     activeProfile,
