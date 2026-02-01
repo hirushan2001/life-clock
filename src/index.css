@@ -126,6 +126,17 @@
   }
 
   body {
+    /* --- Zoom Fix --- */
+    zoom: 0.8; /* Scales UI for Chrome, Edge, and Safari */
+    -moz-transform: scale(0.8); /* Scale fix for Firefox */
+    -moz-transform-origin: top center;
+    
+    /* Ensure background fills the screen at 0.8 scale */
+    min-height: 125vh; 
+    width: 125%;
+    margin-left: -12.5%; /* Centers the scaled-up width */
+    /* ---------------- */
+
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
