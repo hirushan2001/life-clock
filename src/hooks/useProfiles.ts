@@ -144,7 +144,11 @@ export function useProfiles() {
     setState((prev) => ({
       ...prev,
       goals: prev.goals.map((g) =>
-        g.id === id ? { ...g, completed: !g.completed } : g
+        g.id === id ? {
+          ...g,
+          completed: !g.completed,
+          completedAt: !g.completed ? new Date().toISOString() : undefined
+        } : g
       ),
     }));
   }, [setState]);

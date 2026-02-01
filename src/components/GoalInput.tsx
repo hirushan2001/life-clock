@@ -1,5 +1,15 @@
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useState, useEffect } from 'react';
 import { DailyGoal } from '@/hooks/useProfiles';
 import { Target, Check, Edit2, Plus, Trash2, X, Clock } from 'lucide-react';
@@ -20,6 +30,7 @@ const GoalInput = ({ goals, onAdd, onUpdate, onDelete, onToggle }: GoalInputProp
   const [showDeadlineInput, setShowDeadlineInput] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [goalToComplete, setGoalToComplete] = useState<string | null>(null);
   const [, setTick] = useState(0); // Force re-render for timer
 
   // Update timer every minute
@@ -29,6 +40,23 @@ const GoalInput = ({ goals, onAdd, onUpdate, onDelete, onToggle }: GoalInputProp
     }, 60000);
     return () => clearInterval(timer);
   }, []);
+
+  const handleToggle = (id: string, currentCompleted: boolean) => {
+    if (!currentCompleted) {
+      setGoalToComplete(id);
+    } else {
+      onToggle(id);
+    }
+  };
+
+  const confirmCompletion = () => {
+    if (goalToComplete) {
+      onToggle(goalToComplete);
+      setGoalToComplete(null);
+      // Optional: Show toast success
+      // toast.success("Goal completed!");
+    }
+  };
 
   const handleAdd = () => {
     if (newGoal.trim()) {
@@ -178,12 +206,12 @@ const GoalInput = ({ goals, onAdd, onUpdate, onDelete, onToggle }: GoalInputProp
                 ) : (
                   <>
                     <button
-                      onClick={() => onToggle(goal.id)}
+                      onClick={() => handleToggle(goal.id, goal.completed)}
                       className={`
-                        flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center
-                        transition-all duration-300
-                        ${goal.completed ? 'bg-primary border-primary' : 'border-muted-foreground/30 hover:border-primary'}
-                      `}
+                          flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center
+                          transition-all duration-300
+                          ${goal.completed ? 'bg-primary border-primary' : 'border-muted-foreground/30 hover:border-primary'}
+                        `}
                     >
                       {goal.completed && <Check className="w-3 h-3 text-primary-foreground" />}
                     </button>
@@ -205,8 +233,13 @@ const GoalInput = ({ goals, onAdd, onUpdate, onDelete, onToggle }: GoalInputProp
                               Deadline: {new Date(`1970-01-01T${goal.deadline}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
                             </span>
                           )}
-                          {!goal.completed && (
+                          {goal.completed ? (
+                            <span className="text-[10px] font-medium text-emerald-500/80">
+                              • Completed at {goal.completedAt ? new Date(goal.completedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : 'now'}
+                            </span>
+                          ) : (
                             (() => {
+                              // ... existing timer block logic ...
                               const now = new Date();
                               let targetTime = new Date();
 
@@ -276,6 +309,21 @@ const GoalInput = ({ goals, onAdd, onUpdate, onDelete, onToggle }: GoalInputProp
           </motion.div>
         )
       }
+
+      <AlertDialog open={!!goalToComplete} onOpenChange={(open) => !open && setGoalToComplete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Complete Goal?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to mark this goal as completed?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmCompletion}>Yes, Complete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div >
   );
 };
