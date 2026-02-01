@@ -10,8 +10,11 @@ export interface Profile {
 }
 
 export interface DailyGoal {
+  id: string; // Added ID
   profileId: string;
   date: string; // YYYY-MM-DD format
+  createdAt?: string; // ISO string
+  deadline?: string; // ISO string for deadline
   goal: string;
   completed: boolean;
 }
@@ -96,58 +99,67 @@ export function useProfiles() {
     return new Date().toISOString().split('T')[0];
   };
 
-  // Get today's goal for active profile
-  const todayGoal = useMemo(() => {
-    if (!state.activeProfileId) return null;
+  // Get today's goals for active profile
+  const todayGoals = useMemo(() => {
+    if (!state.activeProfileId) return [];
     const today = getTodayString();
-    return state.goals.find(
+    return state.goals.filter(
       (g) => g.profileId === state.activeProfileId && g.date === today
-    ) || null;
+    );
   }, [state.goals, state.activeProfileId]);
 
-  // Set today's goal for active profile
-  const setTodayGoal = useCallback((goalText: string) => {
+  // Add a new goal
+  const addGoal = useCallback((goalText: string, deadline?: string) => {
     if (!state.activeProfileId) return;
-    
     const today = getTodayString();
-    
-    setState((prev) => {
-      const existingGoalIndex = prev.goals.findIndex(
-        (g) => g.profileId === state.activeProfileId && g.date === today
-      );
 
-      const newGoal: DailyGoal = {
-        profileId: state.activeProfileId!,
-        date: today,
-        goal: goalText,
-        completed: false,
-      };
+    const newGoal: DailyGoal = {
+      id: crypto.randomUUID(),
+      profileId: state.activeProfileId,
+      date: today,
+      createdAt: new Date().toISOString(),
+      deadline,
+      goal: goalText,
+      completed: false,
+    };
 
-      if (existingGoalIndex >= 0) {
-        const newGoals = [...prev.goals];
-        newGoals[existingGoalIndex] = { ...newGoals[existingGoalIndex], goal: goalText };
-        return { ...prev, goals: newGoals };
-      }
-
-      return { ...prev, goals: [...prev.goals, newGoal] };
-    });
+    setState((prev) => ({
+      ...prev,
+      goals: [...prev.goals, newGoal],
+    }));
   }, [setState, state.activeProfileId]);
+
+  // Update a goal text
+  const updateGoal = useCallback((id: string, newText: string) => {
+    setState((prev) => ({
+      ...prev,
+      goals: prev.goals.map((g) =>
+        g.id === id ? { ...g, goal: newText } : g
+      ),
+    }));
+  }, [setState]);
 
   // Toggle goal completion
-  const toggleGoalComplete = useCallback(() => {
-    if (!state.activeProfileId) return;
-    
-    const today = getTodayString();
-    
-    setState((prev) => {
-      const newGoals = prev.goals.map((g) =>
-        g.profileId === state.activeProfileId && g.date === today
-          ? { ...g, completed: !g.completed }
-          : g
-      );
-      return { ...prev, goals: newGoals };
-    });
-  }, [setState, state.activeProfileId]);
+  const toggleGoal = useCallback((id: string) => {
+    setState((prev) => ({
+      ...prev,
+      goals: prev.goals.map((g) =>
+        g.id === id ? {
+          ...g,
+          completed: !g.completed,
+          completedAt: !g.completed ? new Date().toISOString() : undefined
+        } : g
+      ),
+    }));
+  }, [setState]);
+
+  // Delete a goal
+  const deleteGoal = useCallback((id: string) => {
+    setState((prev) => ({
+      ...prev,
+      goals: prev.goals.filter((g) => g.id !== id),
+    }));
+  }, [setState]);
 
   return {
     profiles: state.profiles,
@@ -158,8 +170,10 @@ export function useProfiles() {
     updateProfile,
     deleteProfile,
     setActiveProfile,
-    todayGoal,
-    setTodayGoal,
-    toggleGoalComplete,
+    todayGoals,
+    addGoal,
+    updateGoal,
+    toggleGoal,
+    deleteGoal,
   };
 }

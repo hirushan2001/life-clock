@@ -22,47 +22,57 @@ const LifeGrid = ({ dateOfBirth, targetAge }: LifeGridProps) => {
   const grid = useMemo(() => {
     if (!insights) return null;
 
+    const renderYearRow = (rowIndex: number) => (
+      <div key={rowIndex} className="flex gap-0.5 mb-0.5">
+        {/* Year label */}
+        <div className="w-8 flex items-center justify-end pr-2">
+          {rowIndex % 5 === 0 && (
+            <span className="text-[10px] text-muted-foreground font-mono">
+              {rowIndex}
+            </span>
+          )}
+        </div>
+
+        {/* Weeks in year */}
+        {Array.from({ length: weeksPerRow }).map((_, colIndex) => {
+          const weekNumber = rowIndex * weeksPerRow + colIndex + 1;
+          if (weekNumber > totalWeeks) return null;
+
+          const isLived = weekNumber < insights.currentWeek;
+          const isCurrent = weekNumber === insights.currentWeek;
+
+          let className = 'week-box ';
+          if (isCurrent) {
+            className += 'week-current animate-pulse';
+          } else if (isLived) {
+            className += 'week-lived';
+          } else {
+            className += 'week-remaining';
+          }
+
+          return (
+            <div
+              key={colIndex}
+              className={className}
+              title={`Week ${weekNumber} (Year ${rowIndex})`}
+            />
+          );
+        })}
+      </div>
+    );
+
+    const midPoint = Math.ceil(rows / 2);
+    const firstHalf = Array.from({ length: midPoint }).map((_, i) => renderYearRow(i));
+    const secondHalf = Array.from({ length: rows - midPoint }).map((_, i) => renderYearRow(midPoint + i));
+
     return (
-      <div className="min-w-fit mx-auto" style={{ maxWidth: '100%' }}>
-        {Array.from({ length: rows }).map((_, rowIndex) => (
-          <div key={rowIndex} className="flex gap-0.5 mb-0.5">
-            {/* Year label */}
-            <div className="w-8 flex items-center justify-end pr-2">
-              {rowIndex % 10 === 0 && (
-                <span className="text-[10px] text-muted-foreground font-mono">
-                  {rowIndex}
-                </span>
-              )}
-            </div>
-
-            {/* Weeks in year */}
-            {Array.from({ length: weeksPerRow }).map((_, colIndex) => {
-              const weekNumber = rowIndex * weeksPerRow + colIndex + 1;
-              if (weekNumber > totalWeeks) return null;
-
-              const isLived = weekNumber < insights.currentWeek;
-              const isCurrent = weekNumber === insights.currentWeek;
-              // const isRemaining = weekNumber > insights.currentWeek;
-
-              let className = 'week-box ';
-              if (isCurrent) {
-                className += 'week-current animate-pulse';
-              } else if (isLived) {
-                className += 'week-lived';
-              } else {
-                className += 'week-remaining';
-              }
-
-              return (
-                <div
-                  key={colIndex}
-                  className={className}
-                  title={`Week ${weekNumber} (Year ${Math.floor(weekNumber / 52)})`}
-                />
-              );
-            })}
-          </div>
-        ))}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-8 gap-y-4 mx-auto w-full">
+        <div className="min-w-fit">
+          {firstHalf}
+        </div>
+        <div className="min-w-fit">
+          {secondHalf}
+        </div>
       </div>
     );
   }, [rows, totalWeeks, insights]);
