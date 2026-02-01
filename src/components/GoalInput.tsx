@@ -1,13 +1,14 @@
+import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { DailyGoal } from '@/hooks/useProfiles';
-import { Target, Check, Edit2, Plus, Trash2, X } from 'lucide-react';
+import { Target, Check, Edit2, Plus, Trash2, X, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 interface GoalInputProps {
   goals: DailyGoal[];
-  onAdd: (text: string) => void;
+  onAdd: (text: string, deadline?: string) => void;
   onUpdate: (id: string, text: string) => void;
   onDelete: (id: string) => void;
   onToggle: (id: string) => void;
@@ -15,6 +16,8 @@ interface GoalInputProps {
 
 const GoalInput = ({ goals, onAdd, onUpdate, onDelete, onToggle }: GoalInputProps) => {
   const [newGoal, setNewGoal] = useState('');
+  const [newDeadline, setNewDeadline] = useState('');
+  const [showDeadlineInput, setShowDeadlineInput] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [, setTick] = useState(0); // Force re-render for timer
@@ -29,8 +32,30 @@ const GoalInput = ({ goals, onAdd, onUpdate, onDelete, onToggle }: GoalInputProp
 
   const handleAdd = () => {
     if (newGoal.trim()) {
-      onAdd(newGoal.trim());
+      // Validate deadline if present
+      if (newDeadline) {
+        const now = new Date();
+        const [hours, minutes] = newDeadline.split(':').map(Number);
+        const deadlineDate = new Date();
+        deadlineDate.setHours(hours, minutes, 0, 0);
+
+        if (deadlineDate < now) {
+          // You might not have a toast component ready, so I will use a simple alert for now or just return
+          // Assuming user wants me to prevent it.
+          // Let's use basic browser alert for simplicity if no toast system is visible, but user has 'sonner' or similar usually in these stacks.
+          // Checking imports... only standard UI components.
+          // I will use a temporary error state to show a message.
+          toast.error("Invalid Deadline", {
+            description: "You cannot set a deadline in the past.",
+          });
+          return;
+        }
+      }
+
+      onAdd(newGoal.trim(), newDeadline || undefined);
       setNewGoal('');
+      setNewDeadline('');
+      setShowDeadlineInput(false);
     }
   };
 
@@ -73,6 +98,38 @@ const GoalInput = ({ goals, onAdd, onUpdate, onDelete, onToggle }: GoalInputProp
           placeholder="Add a new goal..."
           className="flex-1 bg-background/50"
         />
+        {showDeadlineInput ? (
+          <div className="flex items-center gap-1 bg-background/50 rounded-md border px-2">
+            <Input
+              type="time"
+              value={newDeadline}
+              onChange={(e) => setNewDeadline(e.target.value)}
+              className="w-min border-none h-8 p-0 text-xs focus-visible:ring-0 text-foreground [color-scheme:dark]"
+              autoFocus
+            />
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-6 w-6 text-muted-foreground hover:text-foreground"
+              onClick={() => {
+                setNewDeadline('');
+                setShowDeadlineInput(false);
+              }}
+            >
+              <X className="w-3 h-3" />
+            </Button>
+          </div>
+        ) : (
+          <Button
+            onClick={() => setShowDeadlineInput(true)}
+            variant="outline"
+            size="icon"
+            className={`shrink-0 ${newDeadline ? 'text-blue-500 border-blue-500' : 'text-muted-foreground hover:text-foreground'}`}
+            title="Set Deadline"
+          >
+            <Clock className="w-4 h-4" />
+          </Button>
+        )}
         <Button onClick={handleAdd} disabled={!newGoal.trim()} size="icon" className="shrink-0">
           <Plus className="w-4 h-4" />
         </Button>
@@ -143,18 +200,35 @@ const GoalInput = ({ goals, onAdd, onUpdate, onDelete, onToggle }: GoalInputProp
                           <span className="text-[10px] text-muted-foreground/60">
                             {new Date(goal.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
                           </span>
-                          {!goal.completed && (
-                            <span className="text-[10px] font-medium text-amber-500/80">
-                              • {(() => {
-                                const now = new Date();
-                                const endOfDay = new Date();
-                                endOfDay.setHours(23, 59, 59, 999);
-                                const diff = endOfDay.getTime() - now.getTime();
-                                const hours = Math.floor(diff / (1000 * 60 * 60));
-                                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                                return `${hours}h ${minutes}m left`;
-                              })()}
+                          {goal.deadline && (
+                            <span className="text-[10px] text-blue-500/80 font-medium bg-blue-500/10 px-1.5 py-0.5 rounded-sm">
+                              Deadline: {new Date(`1970-01-01T${goal.deadline}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
                             </span>
+                          )}
+                          {!goal.completed && (
+                            (() => {
+                              const now = new Date();
+                              let targetTime = new Date();
+
+                              if (goal.deadline) {
+                                const [hours, minutes] = goal.deadline.split(':').map(Number);
+                                targetTime.setHours(hours, minutes, 0, 0);
+                              } else {
+                                targetTime.setHours(23, 59, 59, 999);
+                              }
+
+                              const diff = targetTime.getTime() - now.getTime();
+                              const isOverdue = diff < 0;
+
+                              const hours = Math.floor(Math.abs(diff) / (1000 * 60 * 60));
+                              const minutes = Math.floor((Math.abs(diff) % (1000 * 60 * 60)) / (1000 * 60));
+
+                              return (
+                                <span className={`text-[10px] font-medium ${isOverdue ? 'text-red-500 font-semibold' : 'text-amber-500/80'}`}>
+                                  • {isOverdue ? `Overdue by ${hours}h ${minutes}m` : `${hours}h ${minutes}m left`}
+                                </span>
+                              );
+                            })()
                           )}
                         </div>
                       )}

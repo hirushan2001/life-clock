@@ -14,6 +14,7 @@ export interface DailyGoal {
   profileId: string;
   date: string; // YYYY-MM-DD format
   createdAt?: string; // ISO string
+  deadline?: string; // ISO string for deadline
   goal: string;
   completed: boolean;
 }
@@ -108,7 +109,7 @@ export function useProfiles() {
   }, [state.goals, state.activeProfileId]);
 
   // Add a new goal
-  const addGoal = useCallback((goalText: string) => {
+  const addGoal = useCallback((goalText: string, deadline?: string) => {
     if (!state.activeProfileId) return;
     const today = getTodayString();
 
@@ -117,6 +118,7 @@ export function useProfiles() {
       profileId: state.activeProfileId,
       date: today,
       createdAt: new Date().toISOString(),
+      deadline,
       goal: goalText,
       completed: false,
     };
