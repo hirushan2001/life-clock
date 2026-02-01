@@ -23,11 +23,11 @@ const LifeGrid = ({ dateOfBirth, targetAge }: LifeGridProps) => {
     if (!insights) return null;
 
     const renderYearRow = (rowIndex: number) => (
-      <div key={rowIndex} className="flex gap-0.5 mb-0.5">
+      <div key={rowIndex} className="flex gap-px sm:gap-0.5 mb-px sm:mb-0.5">
         {/* Year label */}
-        <div className="w-8 flex items-center justify-end pr-2">
+        <div className="w-5 sm:w-6 md:w-8 flex items-center justify-end pr-1 md:pr-2">
           {rowIndex % 5 === 0 && (
-            <span className="text-[10px] text-muted-foreground font-mono">
+            <span className="text-[8px] md:text-[10px] text-muted-foreground font-mono leading-none">
               {rowIndex}
             </span>
           )}

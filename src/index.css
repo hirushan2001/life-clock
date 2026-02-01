@@ -126,19 +126,32 @@
   }
 
   body {
-    /* --- Zoom Fix --- */
-    zoom: 0.8; /* Scales UI for Chrome, Edge, and Safari */
-    -moz-transform: scale(0.8); /* Scale fix for Firefox */
-    -moz-transform-origin: top center;
-    
-    /* Ensure background fills the screen at 0.8 scale */
-    min-height: 125vh; 
-    width: 125%;
-    margin-left: -12.5%; /* Centers the scaled-up width */
-    /* ---------------- */
-
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+
+    /* --- Desktop Zoom Fix (Screens 1024px and wider) --- */
+    @media (min-width: 1024px) {
+      zoom: 0.8;
+      /* Scales UI for Chrome, Edge, and Safari */
+      -moz-transform: scale(0.8);
+      /* Scale fix for Firefox */
+      -moz-transform-origin: top center;
+
+      /* Ensure background fills the screen at 0.8 scale */
+      min-height: 125vh;
+      width: 125%;
+      margin-left: -12.5%;
+      /* Centers the scaled-up width */
+    }
+
+    /* --- Mobile Fix (Resetting for smaller screens) --- */
+    @media (max-width: 1023px) {
+      zoom: 1;
+      -moz-transform: scale(1);
+      width: 100%;
+      margin-left: 0;
+      min-height: 100vh;
+    }
   }
 
   /* Custom scrollbar */
@@ -177,7 +190,7 @@
 
   /* Week grid styles */
   .week-box {
-    @apply w-2 h-2 md:w-2.5 md:h-2.5 rounded-sm transition-all duration-300;
+    @apply w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 lg:w-2.5 lg:h-2.5 rounded-sm transition-all duration-300;
   }
 
   .week-lived {
