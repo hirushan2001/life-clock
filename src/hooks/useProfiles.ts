@@ -17,6 +17,7 @@ export interface DailyGoal {
   deadline?: string; // ISO string for deadline
   goal: string;
   completed: boolean;
+  completedAt?: string;
 }
 
 interface ProfilesState {
