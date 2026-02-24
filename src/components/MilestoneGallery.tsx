@@ -191,7 +191,7 @@ export const MilestoneGallery = () => {
             if (!line.trim()) return;
 
             // Extract the date from start MM/DD or M/DD
-            const dateMatch = line.match(/^(\d{1,2})\/(\d{1,2})/);
+            const dateMatch = /^(\d{1,2})\/(\d{1,2})/.exec(line);
             if (!dateMatch) return;
 
             const month = dateMatch[1].padStart(2, '0');
@@ -203,9 +203,9 @@ export const MilestoneGallery = () => {
 
             // Try to extract hour (first digit block after the first hyphen)
             let hourStr = '00';
-            const hourMatch = line.match(/-\s*(\d{1,2})/);
+            const hourMatch = /-\s*(\d{1,2})/.exec(line);
             if (hourMatch) {
-                let hour = parseInt(hourMatch[1], 10);
+                let hour = Number.parseInt(hourMatch[1], 10);
                 if (hour >= 1 && hour <= 6) {
                     hour += 12; // Assume 1-6 is PM for classes/exams
                 }
@@ -216,7 +216,7 @@ export const MilestoneGallery = () => {
             let d = new Date(dateString);
 
             // Handle edge case where month passed (say we are in Dec 2026, and date is for Jan 2027)
-            if (d.getTime() < new Date().getTime() - 60 * 24 * 60 * 60 * 1000) {
+            if (d.getTime() < Date.now() - 60 * 24 * 60 * 60 * 1000) {
                 d.setFullYear(year + 1);
             }
 
