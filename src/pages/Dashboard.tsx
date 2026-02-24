@@ -11,6 +11,7 @@ import ProfileSelector from '@/components/ProfileSelector';
 import ThemeToggle from '@/components/ThemeToggle';
 import AddProfileModal from '@/components/AddProfileModal';
 import MilestoneGallery from '@/components/MilestoneGallery';
+import { BucketList } from '@/components/ui/bucket-list/BucketList';
 
 const Dashboard = () => {
   useEffect(() => {
@@ -93,6 +94,11 @@ const Dashboard = () => {
         {/* Milestones */}
         <section className="py-4">
           <MilestoneGallery />
+        </section>
+
+        {/* Bucket List */}
+        <section className="py-4">
+          <BucketList />
         </section>
 
         {/* Two column layout for insights and goal */}
