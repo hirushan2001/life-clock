@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+
 import { Plus, Trash2, Calendar as CalendarIcon } from 'lucide-react';
 import { useMilestones, Milestone } from '@/hooks/useMilestones';
 import { Button } from '@/components/ui/button';
@@ -27,71 +28,32 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { differenceInDays, parseISO, format } from 'date-fns';
 
-const CircularProgress = ({
-    percentage,
-    color,
-    size = 80,
-    strokeWidth = 6,
-    children,
-}: {
-    percentage: number;
-    color: string;
-    size?: number;
-    strokeWidth?: number;
-    children?: React.ReactNode;
-}) => {
-    const radius = (size - strokeWidth) / 2;
-    const circumference = radius * 2 * Math.PI;
-    const offset = circumference - (Math.min(100, Math.max(0, percentage)) / 100) * circumference;
 
-    return (
-        <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-            <svg width={size} height={size} className="transform -rotate-90">
-                <circle
-                    cx={size / 2}
-                    cy={size / 2}
-                    r={radius}
-                    stroke="currentColor"
-                    strokeWidth={strokeWidth}
-                    fill="transparent"
-                    className="text-muted/20"
-                />
-                <motion.circle
-                    initial={{ strokeDashoffset: circumference }}
-                    animate={{ strokeDashoffset: offset }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                    cx={size / 2}
-                    cy={size / 2}
-                    r={radius}
-                    stroke="currentColor"
-                    strokeWidth={strokeWidth}
-                    fill="transparent"
-                    strokeDasharray={circumference}
-                    strokeLinecap="round"
-                    className={color}
-                />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-                {children}
-            </div>
-        </div>
-    );
-};
 
 const MilestoneCard = ({ milestone, onDelete }: { milestone: Milestone; onDelete: (id: string) => void }) => {
-    const [progress, setProgress] = useState(0);
     const [daysRemaining, setDaysRemaining] = useState(0);
+    const [hoursRemaining, setHoursRemaining] = useState(0);
+    const [minutesRemaining, setMinutesRemaining] = useState(0);
+    const [progress, setProgress] = useState(0);
 
     useEffect(() => {
         const calculateProgress = () => {
             const start = parseISO(milestone.createdAt).getTime();
-            const end = parseISO(milestone.targetDate).getTime();
-            const now = new Date().getTime();
+            const target = parseISO(milestone.targetDate);
+            const now = new Date();
+            const daysLeft = Math.max(0, differenceInDays(target, now));
 
-            const totalDuration = end - start;
-            const elapsed = now - start;
+            // For hours and minutes we need total differences then modulo
+            // date-fns difference functions floor the result, which is what we want
+            const totalHoursLeft = Math.max(0, Math.floor((target.getTime() - now.getTime()) / (1000 * 60 * 60)));
+            const hoursLeft = totalHoursLeft % 24;
 
-            // Prevent division by zero and handle past/future
+            const totalMinutesLeft = Math.max(0, Math.floor((target.getTime() - now.getTime()) / (1000 * 60)));
+            const minutesLeft = totalMinutesLeft % 60;
+
+            const totalDuration = target.getTime() - start;
+            const elapsed = now.getTime() - start;
+
             let calculatedProgress = 0;
             if (totalDuration > 0) {
                 calculatedProgress = (elapsed / totalDuration) * 100;
@@ -99,27 +61,27 @@ const MilestoneCard = ({ milestone, onDelete }: { milestone: Milestone; onDelete
                 calculatedProgress = 100;
             }
 
-            const daysLeft = differenceInDays(parseISO(milestone.targetDate), new Date());
-
-            setProgress(calculatedProgress);
             setDaysRemaining(daysLeft);
+            setHoursRemaining(hoursLeft);
+            setMinutesRemaining(minutesLeft);
+            setProgress(calculatedProgress);
         };
 
         calculateProgress();
-        const interval = setInterval(calculateProgress, 60000); // Update every minute
+        const interval = setInterval(calculateProgress, 10000); // Update every 10 seconds since we have minutes now
         return () => clearInterval(interval);
     }, [milestone]);
 
-    const isCompleted = daysRemaining <= 0;
+    const isCompleted = daysRemaining <= 0 && hoursRemaining <= 0 && minutesRemaining <= 0;
 
     return (
-        <div className="glass p-4 rounded-xl flex flex-col items-center justify-between gap-3 relative group hover:bg-card/80 transition-all duration-300">
+        <div className="bg-[#11141c] p-6 pb-8 rounded-xl flex flex-col items-center justify-between gap-6 relative group hover:bg-[#1a1f2e] transition-all duration-300 w-full border border-white/5 overflow-hidden">
             <AlertDialog>
                 <AlertDialogTrigger asChild>
                     <button
-                        className="absolute top-2 right-2 p-1.5 rounded-full bg-background/50 hover:bg-destructive/10 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-all"
+                        className="absolute top-3 right-3 p-1.5 rounded-full bg-background/50 hover:bg-destructive/10 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-all"
                     >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-4 h-4" />
                     </button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -138,30 +100,53 @@ const MilestoneCard = ({ milestone, onDelete }: { milestone: Milestone; onDelete
                 </AlertDialogContent>
             </AlertDialog>
 
-            <div className="mt-2">
-                <CircularProgress
-                    percentage={progress}
-                    color={isCompleted ? "text-emerald-500" : "text-amber-500"}
-                    size={90}
-                >
-                    <div className="text-center">
-                        <span className={`text-lg font-bold ${isCompleted ? "text-emerald-500" : "text-foreground"}`}>
-                            {isCompleted ? "Done" : daysRemaining}
-                        </span>
-                        <span className="text-[10px] uppercase text-muted-foreground block -mt-1">
-                            {isCompleted ? "Great!" : "Days"}
-                        </span>
-                    </div>
-                </CircularProgress>
-            </div>
-
-            <div className="text-center w-full">
-                <h4 className="font-medium text-sm truncate px-2" title={milestone.title}>
+            <div className="text-center w-full mt-2">
+                <h4 className="font-semibold text-base truncate px-4" title={milestone.title}>
                     {milestone.title}
                 </h4>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                    {format(parseISO(milestone.targetDate), 'MMM d, yyyy')}
+                <p className="text-xs text-muted-foreground mt-1">
+                    {format(parseISO(milestone.targetDate), 'MMM d, yyyy • h:mm a')}
                 </p>
+            </div>
+
+            {isCompleted ? (
+                <div className="w-full py-6 flex flex-col items-center justify-center rounded-xl bg-[#1a1f2e]">
+                    <span className="text-3xl font-bold text-emerald-500 tracking-wider">DONE</span>
+                    <span className="text-[11px] uppercase tracking-wider text-[#8b92a5] mt-2">Milestone Reached</span>
+                </div>
+            ) : (
+                <div className="flex justify-center gap-2 w-full z-10">
+                    <div className="flex flex-col items-center justify-center bg-[#1a1f2e] rounded-xl py-4 flex-1 min-w-0 z-10">
+                        <span className="text-[32px] font-bold text-[#f59e0b] leading-none tracking-tight font-mono">
+                            {daysRemaining}
+                        </span>
+                        <span className="text-[11px] uppercase text-[#8b92a5] mt-2 tracking-wider font-medium">Days</span>
+                    </div>
+
+                    <div className="flex flex-col items-center justify-center bg-[#1a1f2e] rounded-xl py-4 flex-1 min-w-0 z-10">
+                        <span className="text-[32px] font-bold text-[#f59e0b] leading-none tracking-tight font-mono">
+                            {hoursRemaining}
+                        </span>
+                        <span className="text-[11px] uppercase text-[#8b92a5] mt-2 tracking-wider font-medium">Hours</span>
+                    </div>
+
+                    <div className="flex flex-col items-center justify-center bg-[#1a1f2e] rounded-xl py-4 flex-1 min-w-0 z-10">
+                        <span className="text-[32px] font-bold text-[#f59e0b] leading-none tracking-tight font-mono">
+                            {minutesRemaining}
+                        </span>
+                        <span className="text-[11px] uppercase text-[#8b92a5] mt-2 tracking-wider font-medium">Minutes</span>
+                    </div>
+                </div>
+            )}
+
+            {/* Progress Bar */}
+            <div className="absolute bottom-0 left-0 h-1.5 w-full bg-black/20">
+                <motion.div
+                    className={`h-full ${isCompleted ? 'bg-emerald-500' : 'bg-[#f59e0b]'}`}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                />
             </div>
         </div>
     );
@@ -172,19 +157,23 @@ export const MilestoneGallery = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [newTitle, setNewTitle] = useState('');
     const [newDate, setNewDate] = useState('');
+    const [newTime, setNewTime] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!newTitle || !newDate) return;
 
+        const dateString = newTime ? `${newDate}T${newTime}` : `${newDate}T00:00`;
+
         addMilestone({
             title: newTitle,
-            targetDate: new Date(newDate).toISOString(), // Use 00:00 local time
+            targetDate: new Date(dateString).toISOString(),
             color: 'amber',
         });
 
         setNewTitle('');
         setNewDate('');
+        setNewTime('');
         setIsOpen(false);
     };
 
@@ -218,15 +207,26 @@ export const MilestoneGallery = () => {
                                     maxLength={30}
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="date">Target Date</Label>
-                                <Input
-                                    id="date"
-                                    type="date"
-                                    min={new Date().toISOString().split('T')[0]}
-                                    value={newDate}
-                                    onChange={(e) => setNewDate(e.target.value)}
-                                />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="date">Target Date</Label>
+                                    <Input
+                                        id="date"
+                                        type="date"
+                                        min={new Date().toISOString().split('T')[0]}
+                                        value={newDate}
+                                        onChange={(e) => setNewDate(e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="time">Time (Optional)</Label>
+                                    <Input
+                                        id="time"
+                                        type="time"
+                                        value={newTime}
+                                        onChange={(e) => setNewTime(e.target.value)}
+                                    />
+                                </div>
                             </div>
                             <DialogFooter>
                                 <Button type="submit" disabled={!newTitle || !newDate}>
