@@ -231,6 +231,10 @@ export const MilestoneGallery = () => {
         setIsBulkOpen(false);
     };
 
+    const sortedMilestones = [...milestones].sort((a, b) =>
+        parseISO(a.targetDate).getTime() - parseISO(b.targetDate).getTime()
+    );
+
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -333,7 +337,7 @@ export const MilestoneGallery = () => {
                 </div>
             ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {milestones.map((milestone) => (
+                    {sortedMilestones.map((milestone) => (
                         <MilestoneCard
                             key={milestone.id}
                             milestone={milestone}
