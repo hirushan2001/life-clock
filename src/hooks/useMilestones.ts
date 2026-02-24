@@ -7,6 +7,7 @@ export interface Milestone {
     createdAt: string; // ISO Date string
     icon?: string;
     color?: string;
+    category?: string;
 }
 
 const STORAGE_KEY = 'life-clock-milestones';

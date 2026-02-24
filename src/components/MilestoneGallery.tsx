@@ -27,7 +27,37 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { differenceInDays, parseISO, format } from 'date-fns';
+
+export const CATEGORY_COLORS: Record<string, string> = {
+    Career: "bg-blue-500",
+    Travel: "bg-emerald-500",
+    Health: "bg-rose-500",
+    Education: "bg-purple-500",
+    Relationships: "bg-pink-500",
+    Other: "bg-amber-500"
+};
+
+export const CATEGORY_TEXT_COLORS: Record<string, string> = {
+    Career: "text-blue-500",
+    Travel: "text-emerald-500",
+    Health: "text-rose-500",
+    Education: "text-purple-500",
+    Relationships: "text-pink-500",
+    Other: "text-amber-500"
+};
+
+export const CATEGORY_BORDER_COLORS: Record<string, string> = {
+    Career: "group-hover:border-blue-500/50",
+    Travel: "group-hover:border-emerald-500/50",
+    Health: "group-hover:border-rose-500/50",
+    Education: "group-hover:border-purple-500/50",
+    Relationships: "group-hover:border-pink-500/50",
+    Other: "group-hover:border-amber-500/50"
+};
+
+export const CATEGORIES = Object.keys(CATEGORY_COLORS);
 
 
 
@@ -75,8 +105,20 @@ const MilestoneCard = ({ milestone, onDelete }: { milestone: Milestone; onDelete
 
     const isCompleted = daysRemaining <= 0 && hoursRemaining <= 0 && minutesRemaining <= 0;
 
+    const category = milestone.category || 'Other';
+    const borderClass = CATEGORY_BORDER_COLORS[category] || CATEGORY_BORDER_COLORS['Other'];
+    const bgClass = CATEGORY_COLORS[category] || CATEGORY_COLORS['Other'];
+    const textColorClass = CATEGORY_TEXT_COLORS[category] || CATEGORY_TEXT_COLORS['Other'];
+
     return (
-        <div className="bg-[#11141c] p-6 pb-8 rounded-xl flex flex-col items-center justify-between gap-6 relative group hover:bg-[#1a1f2e] transition-all duration-300 w-full border border-white/5 overflow-hidden">
+        <div className={`bg-[#11141c] p-6 pb-8 rounded-xl flex flex-col items-center justify-between gap-6 relative group hover:bg-[#1a1f2e] transition-all duration-300 w-full border border-white/5 overflow-hidden ${borderClass}`}>
+
+            <div className="absolute top-3 left-3 flex gap-2">
+                <div className={`text-[10px] px-2 py-0.5 rounded-full bg-[#1a1f2e] border border-white/5 uppercase tracking-wider ${textColorClass}`}>
+                    {category}
+                </div>
+            </div>
+
             <AlertDialog>
                 <AlertDialogTrigger asChild>
                     <button
@@ -112,27 +154,27 @@ const MilestoneCard = ({ milestone, onDelete }: { milestone: Milestone; onDelete
 
             {isCompleted ? (
                 <div className="w-full py-6 flex flex-col items-center justify-center rounded-xl bg-[#1a1f2e]">
-                    <span className="text-3xl font-bold text-emerald-500 tracking-wider">DONE</span>
+                    <span className={`text-3xl font-bold tracking-wider ${textColorClass}`}>DONE</span>
                     <span className="text-[11px] uppercase tracking-wider text-[#8b92a5] mt-2">Milestone Reached</span>
                 </div>
             ) : (
                 <div className="flex justify-center gap-2 w-full z-10">
                     <div className="flex flex-col items-center justify-center bg-[#1a1f2e] rounded-xl py-4 flex-1 min-w-0 z-10">
-                        <span className="text-[32px] font-bold text-[#f59e0b] leading-none tracking-tight font-mono">
+                        <span className={`text-[32px] font-bold leading-none tracking-tight font-mono ${textColorClass}`}>
                             {daysRemaining}
                         </span>
                         <span className="text-[11px] uppercase text-[#8b92a5] mt-2 tracking-wider font-medium">Days</span>
                     </div>
 
                     <div className="flex flex-col items-center justify-center bg-[#1a1f2e] rounded-xl py-4 flex-1 min-w-0 z-10">
-                        <span className="text-[32px] font-bold text-[#f59e0b] leading-none tracking-tight font-mono">
+                        <span className={`text-[32px] font-bold leading-none tracking-tight font-mono ${textColorClass}`}>
                             {hoursRemaining}
                         </span>
                         <span className="text-[11px] uppercase text-[#8b92a5] mt-2 tracking-wider font-medium">Hours</span>
                     </div>
 
                     <div className="flex flex-col items-center justify-center bg-[#1a1f2e] rounded-xl py-4 flex-1 min-w-0 z-10">
-                        <span className="text-[32px] font-bold text-[#f59e0b] leading-none tracking-tight font-mono">
+                        <span className={`text-[32px] font-bold leading-none tracking-tight font-mono ${textColorClass}`}>
                             {minutesRemaining}
                         </span>
                         <span className="text-[11px] uppercase text-[#8b92a5] mt-2 tracking-wider font-medium">Minutes</span>
@@ -143,7 +185,7 @@ const MilestoneCard = ({ milestone, onDelete }: { milestone: Milestone; onDelete
             {/* Progress Bar */}
             <div className="absolute bottom-0 left-0 h-1.5 w-full bg-black/20">
                 <motion.div
-                    className={`h-full ${isCompleted ? 'bg-emerald-500' : 'bg-[#f59e0b]'}`}
+                    className={`h-full ${bgClass}`}
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
                     transition={{ duration: 1, ease: "easeOut" }}
@@ -161,6 +203,9 @@ export const MilestoneGallery = () => {
     const [newTitle, setNewTitle] = useState('');
     const [newDate, setNewDate] = useState('');
     const [newTime, setNewTime] = useState('');
+    const [newCategory, setNewCategory] = useState('Other');
+    const [bulkCategory, setBulkCategory] = useState('Education'); // Default to Education since bulk was mostly used for schedule
+    const [filterCategory, setFilterCategory] = useState('All');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -172,6 +217,7 @@ export const MilestoneGallery = () => {
             title: newTitle,
             targetDate: new Date(dateString).toISOString(),
             color: 'amber',
+            category: newCategory
         });
 
         setNewTitle('');
@@ -224,6 +270,7 @@ export const MilestoneGallery = () => {
                 title: title,
                 targetDate: d.toISOString(),
                 color: 'amber',
+                category: bulkCategory,
             });
         });
 
@@ -231,7 +278,13 @@ export const MilestoneGallery = () => {
         setIsBulkOpen(false);
     };
 
-    const sortedMilestones = [...milestones].sort((a, b) =>
+    const filteredMilestones = milestones.filter(m => {
+        if (filterCategory === 'All') return true;
+        const cat = m.category || 'Other';
+        return cat === filterCategory;
+    });
+
+    const sortedMilestones = [...filteredMilestones].sort((a, b) =>
         parseISO(a.targetDate).getTime() - parseISO(b.targetDate).getTime()
     );
 
@@ -256,6 +309,24 @@ export const MilestoneGallery = () => {
                                 </DialogDescription>
                             </DialogHeader>
                             <form onSubmit={handleBulkSubmit} className="space-y-4 pt-2">
+                                <div className="space-y-2">
+                                    <Label htmlFor="bulk-category">Assign to Category</Label>
+                                    <Select value={bulkCategory} onValueChange={setBulkCategory}>
+                                        <SelectTrigger id="bulk-category">
+                                            <SelectValue placeholder="Select Category" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {CATEGORIES.map(cat => (
+                                                <SelectItem key={cat} value={cat}>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`w-2 h-2 rounded-full ${CATEGORY_COLORS[cat]}`}></span>
+                                                        {cat}
+                                                    </div>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                                 <Textarea
                                     value={bulkText}
                                     onChange={(e) => setBulkText(e.target.value)}
@@ -317,6 +388,24 @@ export const MilestoneGallery = () => {
                                         />
                                     </div>
                                 </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="category">Category</Label>
+                                    <Select value={newCategory} onValueChange={setNewCategory}>
+                                        <SelectTrigger id="category">
+                                            <SelectValue placeholder="Select Category" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {CATEGORIES.map(cat => (
+                                                <SelectItem key={cat} value={cat}>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`w-2 h-2 rounded-full ${CATEGORY_COLORS[cat]}`}></span>
+                                                        {cat}
+                                                    </div>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                                 <DialogFooter>
                                     <Button type="submit" disabled={!newTitle || !newDate}>
                                         Create Milestone
@@ -327,6 +416,33 @@ export const MilestoneGallery = () => {
                     </Dialog>
                 </div>
             </div>
+
+            {milestones.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2 py-2">
+                    <button
+                        onClick={() => setFilterCategory('All')}
+                        className={`text-xs px-3 py-1.5 rounded-full transition-colors font-medium border ${filterCategory === 'All'
+                            ? 'bg-white text-black border-white'
+                            : 'bg-white/5 text-muted-foreground border-white/5 hover:bg-white/10'
+                            }`}
+                    >
+                        All
+                    </button>
+                    {CATEGORIES.map(cat => (
+                        <button
+                            key={cat}
+                            onClick={() => setFilterCategory(cat)}
+                            className={`text-xs px-3 py-1.5 rounded-full transition-colors font-medium border flex items-center gap-1.5 ${filterCategory === cat
+                                ? `bg-white/10 ${CATEGORY_TEXT_COLORS[cat]} border-white/20`
+                                : 'bg-white/5 text-muted-foreground border-white/5 hover:bg-white/10'
+                                }`}
+                        >
+                            <span className={`w-2 h-2 rounded-full ${CATEGORY_COLORS[cat]}`}></span>
+                            {cat}
+                        </button>
+                    ))}
+                </div>
+            )}
 
             {milestones.length === 0 ? (
                 <div className="glass rounded-xl p-8 text-center border-dashed border-2 border-border/50 bg-card/30">
