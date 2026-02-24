@@ -25,6 +25,7 @@ export const BucketList = () => {
     // Form state
     const [newTitle, setNewTitle] = useState('');
     const [newImageUrl, setNewImageUrl] = useState('');
+    const [imagePreviewUrl, setImagePreviewUrl] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
 
     const pendingItems = useMemo(() => items.filter(item => item.status === 'pending'), [items]);
@@ -43,13 +44,26 @@ export const BucketList = () => {
 
         addItem({
             title: newTitle.trim(),
-            imageUrl: newImageUrl.trim() || undefined,
+            imageUrl: imagePreviewUrl || newImageUrl.trim() || undefined,
         });
 
         setNewTitle('');
         setNewImageUrl('');
+        setImagePreviewUrl('');
         setIsOpen(false);
         setActiveTab('pending'); // switch to pending to see new item
+    };
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreviewUrl(reader.result as string);
+                setNewImageUrl(''); // Clear URL if file is uploaded
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     const emptyStateContent = activeTab === 'pending' ? (
@@ -84,8 +98,8 @@ export const BucketList = () => {
                         <button
                             onClick={() => setActiveTab('pending')}
                             className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${activeTab === 'pending'
-                                    ? 'bg-indigo-500/20 text-indigo-300'
-                                    : 'text-muted-foreground hover:text-white'
+                                ? 'bg-indigo-500/20 text-indigo-300'
+                                : 'text-muted-foreground hover:text-white'
                                 }`}
                         >
                             Aspirations ({pendingItems.length})
@@ -93,8 +107,8 @@ export const BucketList = () => {
                         <button
                             onClick={() => setActiveTab('achieved')}
                             className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${activeTab === 'achieved'
-                                    ? 'bg-emerald-500/20 text-emerald-400'
-                                    : 'text-muted-foreground hover:text-white'
+                                ? 'bg-emerald-500/20 text-emerald-400'
+                                : 'text-muted-foreground hover:text-white'
                                 }`}
                         >
                             Achieved ({achievedItems.length})
@@ -140,16 +154,31 @@ export const BucketList = () => {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="image">Cover Image URL (Optional)</Label>
-                                    <Input
-                                        id="image"
-                                        placeholder="https://images.unsplash.com/..."
-                                        value={newImageUrl}
-                                        onChange={(e) => setNewImageUrl(e.target.value)}
-                                    />
-                                    {newImageUrl && (
+                                    <Label>Cover Image (Optional)</Label>
+                                    <div className="flex flex-col gap-3">
+                                        <div className="flex items-center gap-2">
+                                            <Input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageUpload}
+                                                className="cursor-pointer file:cursor-pointer file:bg-indigo-500/10 file:text-indigo-400 file:border-0 file:rounded-full file:px-3 file:text-xs file:font-semibold"
+                                            />
+                                        </div>
+                                        {/* <div className="flex items-center gap-2">
+                                            <span className="text-xs text-muted-foreground w-12 text-center">OR URL</span>
+                                            <Input
+                                                placeholder="https://images.unsplash.com/..."
+                                                value={newImageUrl}
+                                                onChange={(e) => {
+                                                    setNewImageUrl(e.target.value);
+                                                    setImagePreviewUrl(''); // Clear file preview if URL is typed
+                                                }}
+                                            />
+                                        </div> */}
+                                    </div>
+                                    {(imagePreviewUrl || newImageUrl) && (
                                         <div className="mt-4 rounded-xl overflow-hidden h-32 w-full relative bg-muted/20 border border-white/10">
-                                            <img src={newImageUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => {
+                                            <img src={imagePreviewUrl || newImageUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => {
                                                 (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM2NjYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHg9IjMiIHk9IjMiIHJ4PSIyIiByeT0iMiIvPjxjaXJjbGUgY3g9IjkiIGN5PSI5IiByPSIyIi8+PHBhdGggZD0ibTIxIDE1LTMuMDgtMy4wOGExLjIgMS4yIDAgMCAwLTEuNzEgMGwtOS4yNiA5LjI2Ii8+PC9zdmc+'
                                             }} />
                                         </div>
